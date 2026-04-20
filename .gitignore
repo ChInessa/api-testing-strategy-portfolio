@@ -14,16 +14,19 @@ node_modules/
 # logs
 *.log
 
-# reports (local)
-reports/*
-!reports/.gitkeep
+# reports (generated)
+reports/
 
-# allure
+# allure (generated)
 allure-report/
 allure-results/
+
+# generated site (pages / reports)
+site/
 
 # postman cache
 .postman/
 
-# notifications
-notifications/*.jar
+# optional local env files
+.env.local
+.env.*.local
