@@ -4,22 +4,22 @@
   "values": [
     {
       "key": "baseUrl",
-      "value": "http://core-service-test.k8s-apps.videoanalytics.tech/api",
+      "value": "https://test-api.example.com",
       "enabled": true
     },
     {
       "key": "keycloakUrl",
-      "value": "https://auth.dev.videoanalytics.tech",
+      "value": "https://auth.example.com",
       "enabled": true
     },
     {
       "key": "realm",
-      "value": "rnva",
+      "value": "example",
       "enabled": true
     },
     {
       "key": "client_id",
-      "value": "rnva-qa",
+      "value": "example-client",
       "enabled": true
     },
     {
@@ -27,8 +27,5 @@
       "value": "",
       "enabled": true
     }
-  ],
-  "_postman_variable_scope": "environment",
-  "_postman_exported_at": "2026-04-10T00:00:00.000Z",
-  "_postman_exported_using": "Postman"
+  ]
 }
