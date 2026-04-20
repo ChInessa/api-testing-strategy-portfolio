@@ -49,8 +49,8 @@ REPORT_URL="${REPORT_BASE}/${REPORT_ENV}/archive/${SUITE}-${CI_PIPELINE_ID}/"
 mkdir -p "allure-results/$SUITE"
 
 # Подтягиваем history из gh-pages, если ветка существует
-if git ls-remote --exit-code origin "${PAGES_BRANCH}" >/dev/null 2>&1; then
-  git clone --depth 1 --branch "${PAGES_BRANCH}" . repo-history
+if git ls-remote --exit-code github "${PAGES_BRANCH}" >/dev/null 2>&1; then
+  git clone --depth 1 --branch "${PAGES_BRANCH}" "$(git remote get-url github)" repo-history
 fi
 
 # Копируем history предыдущего отчёта, если он существует
