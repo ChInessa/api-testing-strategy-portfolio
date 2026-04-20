@@ -136,8 +136,8 @@ def collect_data():
         "latest_count": len(latest),
         "archive_count": len(archive),
         "dev_smoke_count": len([x for x in archive if x["env"] == "dev" and x["suite"] == "smoke"]),
-        "test_smoke_count": len([x for x in archive if x["env"] == "test-stand" and x["suite"] == "smoke"]),
-        "test_regression_count": len([x for x in archive if x["env"] == "test-stand" and x["suite"] == "regression"]),
+        "test_smoke_count": len([x for x in archive if x["env"] == "test" and x["suite"] == "smoke"]),
+        "test_regression_count": len([x for x in archive if x["env"] == "test" and x["suite"] == "regression"]),
     }
 
     return latest, archive, totals
@@ -426,7 +426,7 @@ def render_html(latest, archive, totals):
         <select id="env-filter">
           <option value="">Все окружения</option>
           <option value="dev">dev</option>
-          <option value="test-stand">test-stand</option>
+          <option value="test">test</option>
         </select>
 
         <select id="suite-filter">
