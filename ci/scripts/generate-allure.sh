@@ -16,8 +16,7 @@ fi
 
 SUITE="$1"
 
-# Проверяем обязательные переменные окружения,
-# которые должны приходить из GitLab CI
+# Проверяем обязательные переменные окружения
 : "${REPORT_ENV:?Ошибка: переменная REPORT_ENV не задана}"
 : "${REPORT_BASE:?Ошибка: переменная REPORT_BASE не задана}"
 : "${CI_PIPELINE_ID:?Ошибка: переменная CI_PIPELINE_ID не задана}"
@@ -26,7 +25,6 @@ SUITE="$1"
 : "${CI_COMMIT_REF_NAME:?Ошибка: переменная CI_COMMIT_REF_NAME не задана}"
 : "${CI_COMMIT_SHA:?Ошибка: переменная CI_COMMIT_SHA не задана}"
 : "${PAGES_BRANCH:?Ошибка: переменная PAGES_BRANCH не задана}"
-: "${GL_PAGES_PUSH_TOKEN:?Ошибка: переменная GL_PAGES_PUSH_TOKEN не задана}"
 
 # Дата запуска в удобочитаемом формате
 RUN_DATE_HUMAN="$(date +"%Y-%m-%d %H:%M:%S %Z")"
@@ -50,28 +48,24 @@ REPORT_URL="${REPORT_BASE}/${REPORT_ENV}/archive/${SUITE}-${CI_PIPELINE_ID}/"
 # Создаём базовую директорию для результатов Allure
 mkdir -p "allure-results/$SUITE"
 
-# Клонируем ветку со страницами, чтобы подтянуть history предыдущего отчёта
-git clone "https://oauth2:${GL_PAGES_PUSH_TOKEN}@gitlab.videoanalytics.tech/va/qa/autotests/newman.git" repo-history
-
-cd repo-history
-git checkout "$PAGES_BRANCH" || git checkout --orphan "$PAGES_BRANCH"
-cd ..
-
-# Копируем history предыдущего отчёта, если он существует.
-# Это нужно для trend-графиков и истории запусков в Allure.
-mkdir -p "allure-results/$SUITE/history"
-if [ -d "repo-history/public/${REPORT_ENV}/${SUITE}/history" ]; then
-  cp -r "repo-history/public/${REPORT_ENV}/${SUITE}/history/"* "allure-results/$SUITE/history/" 2>/dev/null || true
+# Подтягиваем history из gh-pages, если ветка существует
+if git ls-remote --exit-code origin "${PAGES_BRANCH}" >/dev/null 2>&1; then
+  git clone --depth 1 --branch "${PAGES_BRANCH}" . repo-history
 fi
 
-# Формируем executor.json — метаданные о запуске в GitLab CI,
-# которые будут отображаться в отчёте Allure
+# Копируем history предыдущего отчёта, если он существует
+mkdir -p "allure-results/$SUITE/history"
+if [ -d "repo-history/${REPORT_ENV}/${SUITE}/history" ]; then
+  cp -r "repo-history/${REPORT_ENV}/${SUITE}/history/"* "allure-results/$SUITE/history/" 2>/dev/null || true
+fi
+
+# Формируем executor.json — метаданные о запуске в GitHub Actions
 python3 - <<PY
 import json
 
 data = {
-    "name": "GitLab CI",
-    "type": "gitlab",
+    "name": "GitHub Actions",
+    "type": "github",
     "url": "${CI_SERVER_URL}",
     "buildOrder": int("${BUILD_ORDER}"),
     "buildName": "${BUILD_NAME}",
@@ -84,12 +78,10 @@ with open("allure-results/${SUITE}/executor.json", "w", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False)
 PY
 
-# Читаем причину падения тестов, если файл был создан ранее.
-# Если файла нет, подставляем значение по умолчанию.
+# Читаем причину падения тестов
 FAILURE_REASON="$(cat "reports/failure_reason_${SUITE}.txt" 2>/dev/null || echo "No failure")"
 
-# Формируем environment.properties — дополнительные параметры запуска,
-# которые будут видны внутри Allure-отчёта
+# Формируем environment.properties
 {
   echo "environment=${REPORT_ENV}"
   echo "suite=${SUITE}"

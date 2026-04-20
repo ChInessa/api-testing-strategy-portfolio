@@ -6,7 +6,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 # Базовая директория, где лежит сгенерированный сайт с отчётами
-BASE_DIR = "repo-pages/public"
+BASE_DIR = "repo-pages"
 
 # Часовой пояс для отображения дат публикации
 TIMEZONE = ZoneInfo("Europe/Moscow")
@@ -122,7 +122,7 @@ def collect_data():
 
     for env, suites in (
         ("dev", ["smoke"]),
-        ("test-stand", ["smoke", "regression"]),
+        ("test", ["smoke", "regression"]),
     ):
         for suite in suites:
             archive_items = list_archive(env, suite)
