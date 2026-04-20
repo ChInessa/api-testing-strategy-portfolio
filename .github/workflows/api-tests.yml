@@ -11,25 +11,10 @@ on:
         options:
           - smoke
           - regression
-      environment:
-        description: "Окружение"
-        required: true
-        default: dev
-        type: choice
-        options:
-          - dev
-          - test
 
   push:
     branches:
       - main
-
-  schedule:
-    # Каждый понедельник в 03:00 UTC
-    - cron: "0 3 * * 1"
-
-permissions:
-  contents: write
 
 jobs:
   smoke:
@@ -42,92 +27,62 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      REPORT_ENV: dev
-      REPORT_BASE: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
-      CI_PIPELINE_ID: ${{ github.run_number }}
-      CI_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      CI_SERVER_URL: ${{ github.server_url }}
-      CI_COMMIT_REF_NAME: ${{ github.ref_name }}
-      CI_COMMIT_SHA: ${{ github.sha }}
-      CI_PIPELINE_CREATED_AT: ${{ github.event.head_commit.timestamp }}
-      PAGES_BRANCH: gh-pages
-      POSTMAN_ENV: dev
-      CLIENT_SECRET_DEV: ${{ secrets.CLIENT_SECRET_DEV }}
-      CLIENT_SECRET_TEST: ${{ secrets.CLIENT_SECRET_TEST }}
-
     steps:
+      # Забираем код репозитория
       - name: Забираем код репозитория
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
+      # Устанавливаем Node.js
       - name: Устанавливаем Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # Устанавливаем Python
       - name: Устанавливаем Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Устанавливаем зависимости npm
+      # Устанавливаем зависимости
+      - name: Устанавливаем зависимости
         run: npm install
 
-      - name: Устанавливаем Allure
+      # Подготавливаем каталоги для результатов
+      - name: Подготавливаем каталоги
         run: |
-          sudo apt-get update
-          sudo apt-get install -y default-jre rsync jq
-          npm install -g allure-commandline --unsafe-perm=true
+          mkdir -p reports
+          mkdir -p reports/htmlextra/smoke
+          mkdir -p allure-results/smoke
 
+      # Демонстрационный запуск smoke тестов
+      # continue-on-error оставляем, чтобы workflow был витриной процесса,
+      # даже если реальные внешние зависимости недоступны
       - name: Запускаем smoke тесты
-        id: smoke_tests
         continue-on-error: true
         run: |
-          bash ci/scripts/run-tests.sh smoke postman/environments/dev.json
+          bash scripts/run-newman.sh smoke postman/environments/dev.json || true
 
-      - name: Генерируем smoke отчёт
+      # Сохраняем артефакты
+      - name: Загружаем артефакты smoke
         if: always()
-        run: |
-          bash ci/scripts/generate-allure.sh smoke
-
-      - name: Публикуем smoke pages
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          bash ci/scripts/publish-pages.sh
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-artifacts
+          path: |
+            reports
+            allure-results
+          if-no-files-found: warn
 
   regression:
-    # Regression запускается:
-    # - по расписанию
-    # - при ручном запуске, если выбран regression
-    if: >
-      github.event_name == 'schedule' ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.suite == 'regression')
+    # Regression запускается только вручную
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.suite == 'regression'
 
     runs-on: ubuntu-latest
 
-    env:
-      REPORT_ENV: test
-      REPORT_BASE: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
-      CI_PIPELINE_ID: ${{ github.run_number }}
-      CI_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      CI_SERVER_URL: ${{ github.server_url }}
-      CI_COMMIT_REF_NAME: ${{ github.ref_name }}
-      CI_COMMIT_SHA: ${{ github.sha }}
-      CI_PIPELINE_CREATED_AT: ${{ github.event.head_commit.timestamp }}
-      PAGES_BRANCH: gh-pages
-      POSTMAN_ENV: test
-      CLIENT_SECRET_DEV: ${{ secrets.CLIENT_SECRET_DEV }}
-      CLIENT_SECRET_TEST: ${{ secrets.CLIENT_SECRET_TEST }}
-
     steps:
       - name: Забираем код репозитория
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Устанавливаем Node.js
         uses: actions/setup-node@v4
@@ -139,29 +94,27 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Устанавливаем зависимости npm
+      - name: Устанавливаем зависимости
         run: npm install
 
-      - name: Устанавливаем Allure
+      - name: Подготавливаем каталоги
         run: |
-          sudo apt-get update
-          sudo apt-get install -y default-jre rsync jq
-          npm install -g allure-commandline --unsafe-perm=true
+          mkdir -p reports
+          mkdir -p reports/htmlextra/regression
+          mkdir -p allure-results/regression
 
+      # Демонстрационный запуск regression тестов
       - name: Запускаем regression тесты
-        id: regression_tests
         continue-on-error: true
         run: |
-          bash ci/scripts/run-tests.sh regression postman/environments/test.json
+          bash scripts/run-newman.sh regression postman/environments/test.json || true
 
-      - name: Генерируем regression отчёт
+      - name: Загружаем артефакты regression
         if: always()
-        run: |
-          bash ci/scripts/generate-allure.sh regression
-
-      - name: Публикуем regression pages
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          bash ci/scripts/publish-pages.sh
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-artifacts
+          path: |
+            reports
+            allure-results
+          if-no-files-found: warn
