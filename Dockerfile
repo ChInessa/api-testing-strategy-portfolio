@@ -1,5 +1,4 @@
-# Образ для запуска API-автотестов, генерации Allure-отчётов
-# и публикации результатов в GitLab CI/CD
+# Образ для запуска API-автотестов и генерации Allure-отчётов
 FROM node:18-bullseye
 
 # Версия Allure CLI
@@ -14,9 +13,9 @@ WORKDIR /app
 # Устанавливаем системные зависимости:
 # - default-jre: нужен для Allure
 # - curl, unzip: нужны для скачивания и распаковки
-# - git: нужен для работы с репозиторием и веткой gl-pages
+# - git: нужен для работы с репозиторием
 # - python3: нужен для генерации dashboard-страницы
-# - rsync: нужен для публикации latest и archive отчётов
+# - rsync: используется в скриптах публикации и синхронизации отчётов
 # - jq: полезен для обработки JSON при необходимости
 RUN apt-get update && apt-get install -y --no-install-recommends \
     default-jre \
