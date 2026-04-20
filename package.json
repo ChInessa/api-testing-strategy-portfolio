@@ -1,0 +1,22 @@
+{
+  "name": "csip_postman",
+  "version": "1.0.0",
+  "description": "API autotests for Postman/Newman",
+  "type": "commonjs",
+  "dependencies": {
+    "newman": "5.3.2",
+    "newman-reporter-allure": "2.15.1",
+    "newman-reporter-htmlextra": "1.22.5",
+    "postman2openapi": "1.2.1"
+  },
+  "scripts": {
+    "test:smoke": "bash scripts/run-newman.sh smoke",
+    "test:regression": "bash scripts/run-newman.sh regression",
+    "convert:openapi": "node scripts/convert.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab-new.ru-central1.internal/csip/csip_postman.git"
+  },
+  "license": "ISC"
+}

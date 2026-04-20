@@ -1,0 +1,10 @@
+.git
+.gitlab
+node_modules
+allure-results
+reports
+site
+out
+public
+repo-pages
+repo-history

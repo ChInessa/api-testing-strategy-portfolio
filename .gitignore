@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+
+# environment
+.env
+
+# macOS
+.DS_Store
+
+# logs
+*.log
+
+# reports (local)
+reports/*
+!reports/.gitkeep
+
+# allure
+allure-report/
+allure-results/
+
+# postman cache
+.postman/
+
+# notifications
+notifications/*.jar

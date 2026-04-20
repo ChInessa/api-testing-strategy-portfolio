@@ -1,0 +1,2306 @@
+{
+  "info": {
+    "_postman_id": "fee996ab-725a-4d45-9a7f-6e899806796e",
+    "name": "Bearer API smoke",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49602980",
+    "_collection_link": "https://go.postman.co/collection/49602980-fee996ab-725a-4d45-9a7f-6e899806796e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "00 auth",
+      "item": [
+        {
+          "name": "00.1 Получить access toke",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить access token",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"Auth endpoint returns expected status\", function () {",
+                  "    pm.expect([200, 401, 403, 405]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "const contentType = pm.response.headers.get(\"Content-Type\") || \"\";",
+                  "const isJson = contentType.includes(\"application/json\");",
+                  "",
+                  "if (isJson) {",
+                  "    pm.test(\"Auth response is JSON\", function () {",
+                  "        pm.response.to.have.jsonBody();",
+                  "    });",
+                  "}",
+                  "",
+                  "let jsonData = null;",
+                  "if (isJson) {",
+                  "    jsonData = pm.response.json();",
+                  "}",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test(\"Auth response contains access_token\", function () {",
+                  "        pm.expect(jsonData).to.have.property(\"access_token\");",
+                  "        pm.expect(jsonData.access_token).to.be.a(\"string\").and.not.empty;",
+                  "    });",
+                  "",
+                  "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                  "    pm.environment.set(\"authAvailable\", \"true\");",
+                  "",
+                  "    console.log(\"access_token saved\");",
+                  "} else {",
+                  "    pm.environment.unset(\"access_token\");",
+                  "    pm.environment.set(\"authAvailable\", \"false\");",
+                  "",
+                  "    console.log(\"Auth unavailable. Status:\", pm.response.code);",
+                  "    console.log(\"Response body:\", pm.response.text());",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.environment.unset(\"access_token\");",
+                  "pm.environment.set(\"authAvailable\", \"false\");"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "type": "text",
+                  "key": "client_id",
+                  "value": "rnva-qa"
+                },
+                {
+                  "type": "text",
+                  "key": "client_secret",
+                  "value": "{{client_secret}}"
+                },
+                {
+                  "type": "text",
+                  "key": "grant_type",
+                  "value": "client_credentials"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{keycloakUrl}}/realms/rnva/protocol/openid-connect/token",
+              "host": [
+                "{{keycloakUrl}}"
+              ],
+              "path": [
+                "realms",
+                "rnva",
+                "protocol",
+                "openid-connect",
+                "token"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "auth",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [
+                    {
+                      "type": "text",
+                      "key": "client_id",
+                      "value": "backend"
+                    },
+                    {
+                      "type": "text",
+                      "key": "client_secret",
+                      "value": "{{client_secret}}"
+                    },
+                    {
+                      "type": "text",
+                      "key": "grant_type",
+                      "value": "client_credentials"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{keycloakUrl}}/protocol/openid-connect/token",
+                  "host": [
+                    "{{keycloakUrl}}"
+                  ],
+                  "path": [
+                    "protocol",
+                    "openid-connect",
+                    "token"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": null,
+              "header": null,
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "bearer"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "// @allure.label.epic=smoke",
+              "// @allure.label.feature=Авторизация",
+              "// @allure.label.tag=smoke,auth",
+              "// @allure.label.severity=blocker",
+              "// @allure.label.owner=Backend",
+              "// @allure.link=https://testrail.mastercr.ru/index.php?/cases/view/2637"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Auth",
+              "//allure.tag=auth"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 health",
+      "item": [
+        {
+          "name": "01.1 Получить список шаблонов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить список шаблонов",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /templates returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Templates array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each template has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"id\");",
+                  "        pm.expect(item.id).to.exist;",
+                  "",
+                  "        pm.expect(item).to.have.property(\"title\");",
+                  "        pm.expect(item).to.have.property(\"description\");",
+                  "        pm.expect(item).to.have.property(\"severity\");",
+                  "        pm.expect(item).to.have.property(\"label\");",
+                  "        pm.expect(item).to.have.property(\"message\");",
+                  "        pm.expect(item).to.have.property(\"parameters\");",
+                  "",
+                  "        pm.expect(item.parameters).to.be.an(\"array\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/reports/:type",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports",
+                    ":type"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "DRAINAGE"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": false,\n    \"filterable\": true,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"TEXT\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": true,\n    \"filterable\": false,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"MULTI_NUMBER\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "01.2 Получить список аналитических параметров",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить список аналитических параметров",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /analytic-params returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Analytic params array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each analytic param has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"name\");",
+                  "        pm.expect(item.name).to.be.a(\"string\");",
+                  "",
+                  "        pm.expect(item).to.have.property(\"description\");",
+                  "        pm.expect(item.description).to.be.a(\"string\");",
+                  "",
+                  "        pm.expect(item).to.have.property(\"value\");",
+                  "        pm.expect(item.value).to.be.a(\"number\");",
+                  "",
+                  "        pm.expect(item).to.have.property(\"createdAt\");",
+                  "        pm.expect(item.createdAt).to.exist;",
+                  "",
+                  "        pm.expect(item).to.have.property(\"updatedAt\");",
+                  "        pm.expect(item.updatedAt).to.exist;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytic-params",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytic-params"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/reports/:type",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports",
+                    ":type"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "DRAINAGE"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": false,\n    \"filterable\": true,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"TEXT\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": true,\n    \"filterable\": false,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"MULTI_NUMBER\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "01.3 Получить события дашборда",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить события дашборда",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /dashboard/events returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Dashboard events array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each dashboard event has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"label\");",
+                  "        pm.expect(item).to.have.property(\"eventType\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "events"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/reports/:type",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports",
+                    ":type"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "DRAINAGE"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": false,\n    \"filterable\": true,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"TEXT\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": true,\n    \"filterable\": false,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"MULTI_NUMBER\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "01.4 Получить список отчетов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить список отчетов",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /reports returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Reports array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each report has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"type\");",
+                  "        pm.expect(item.type).to.be.a(\"string\").and.not.empty;",
+                  "",
+                  "        pm.expect(item).to.have.property(\"name\");",
+                  "        pm.expect(item.name).to.be.a(\"string\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/reports/:type",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports",
+                    ":type"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "DRAINAGE"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": false,\n    \"filterable\": true,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"TEXT\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  },\n  {\n    \"label\": \"string\",\n    \"field\": \"string\",\n    \"sortable\": true,\n    \"filterable\": false,\n    \"filters\": [\n      {\n        \"type\": \"DATE_TIME\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      },\n      {\n        \"type\": \"MULTI_NUMBER\",\n        \"options\": [\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          },\n          {\n            \"value\": \"string\",\n            \"name\": \"string\"\n          }\n        ]\n      }\n    ]\n  }\n]"
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "bearer"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "// @allure.label.epic=smoke",
+              "// @allure.label.feature=Авторизация",
+              "// @allure.label.tag=smoke,auth",
+              "// @allure.label.severity=blocker",
+              "// @allure.label.owner=Backend",
+              "// @allure.link=https://testrail.mastercr.ru/index.php?/cases/view/2637"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Health",
+              "//allure.tag=health"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 cache smoke",
+      "item": [
+        {
+          "name": "02.1 Записать значение в кеш",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.environment.unset(\"writtenCacheKey\");",
+                  "pm.environment.unset(\"cacheExistsBeforeDelete\");",
+                  "pm.environment.unset(\"deletedCacheKey\");",
+                  "",
+                  "const generatedKey = \"smoke_cache_\" + Date.now();",
+                  "pm.environment.set(\"cacheKey\", generatedKey);",
+                  "",
+                  "console.log(\"cacheKey generated:\", generatedKey);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Записать значение в кеш",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"POST /test/cache/write/{key} returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const cacheKey = pm.environment.get(\"cacheKey\");",
+                  "",
+                  "pm.test(\"cacheKey exists in environment\", function () {",
+                  "    pm.expect(cacheKey).to.exist;",
+                  "    pm.expect(cacheKey).to.be.a(\"string\").and.not.empty;",
+                  "});",
+                  "",
+                  "pm.environment.set(\"writtenCacheKey\", String(cacheKey));",
+                  "console.log(\"writtenCacheKey saved:\", cacheKey);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/test/cache/write/{{cacheKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test",
+                "cache",
+                "write",
+                "{{cacheKey}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/test/cache/write/:key",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "test",
+                    "cache",
+                    "write",
+                    ":key"
+                  ],
+                  "variable": [
+                    {
+                      "key": "key",
+                      "value": "string"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "{}"
+            }
+          ]
+        },
+        {
+          "name": "02.2 Проверить наличие ключа после записи",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Проверить наличие ключа после записи",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /test/cache/exists/{key} returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response has boolean 'exists' field\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"exists\");",
+                  "    pm.expect(jsonData.exists).to.be.a(\"boolean\");",
+                  "});",
+                  "",
+                  "pm.test(\"Cache key exists after write\", function () {",
+                  "    pm.expect(jsonData.exists).to.eql(true);",
+                  "});",
+                  "",
+                  "pm.environment.set(\"cacheExistsBeforeDelete\", String(jsonData.exists));",
+                  "console.log(\"cacheExistsBeforeDelete:\", jsonData.exists);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const cacheKey = pm.environment.get(\"cacheKey\");",
+                  "",
+                  "if (!cacheKey) {",
+                  "    throw new Error(\"cacheKey is missing. Run 02.1 write first.\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/test/cache/exists/{{cacheKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test",
+                "cache",
+                "exists",
+                "{{cacheKey}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/test/cache/exists/:key",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "test",
+                    "cache",
+                    "exists",
+                    ":key"
+                  ],
+                  "variable": [
+                    {
+                      "key": "key",
+                      "value": "string"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "{}"
+            }
+          ]
+        },
+        {
+          "name": "02.3 Удалить ключ",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Удалить ключ",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"DELETE /test/cache/delete/{key} returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const cacheKey = pm.environment.get(\"cacheKey\");",
+                  "",
+                  "pm.test(\"cacheKey exists in environment\", function () {",
+                  "    pm.expect(cacheKey).to.exist;",
+                  "    pm.expect(cacheKey).to.be.a(\"string\").and.not.empty;",
+                  "});",
+                  "",
+                  "pm.environment.set(\"deletedCacheKey\", String(cacheKey));",
+                  "console.log(\"deletedCacheKey saved:\", cacheKey);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const cacheKey = pm.environment.get(\"cacheKey\");",
+                  "",
+                  "if (!cacheKey) {",
+                  "    throw new Error(\"cacheKey is missing. Run 02.1 write first.\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/test/cache/delete/{{cacheKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test",
+                "cache",
+                "delete",
+                "{{cacheKey}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/test/cache/delete/:key",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "test",
+                    "cache",
+                    "delete",
+                    ":key"
+                  ],
+                  "variable": [
+                    {
+                      "key": "key",
+                      "value": "string"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "{}"
+            }
+          ]
+        },
+        {
+          "name": "02.4 Проверить отсутствие ключа после удаления",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Проверить отсутствие ключа после удаления",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /test/cache/exists/{key} after delete returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response has boolean 'exists' field\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"exists\");",
+                  "    pm.expect(jsonData.exists).to.be.a(\"boolean\");",
+                  "});",
+                  "",
+                  "pm.test(\"Cache key does not exist after delete\", function () {",
+                  "    pm.expect(jsonData.exists).to.eql(false);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const cacheKey = pm.environment.get(\"cacheKey\");",
+                  "",
+                  "if (!cacheKey) {",
+                  "    throw new Error(\"cacheKey is missing. Run previous cache steps first.\");",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/test/cache/exists/{{cacheKey}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test",
+                "cache",
+                "exists",
+                "{{cacheKey}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/test/cache/delete/:key",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "test",
+                    "cache",
+                    "delete",
+                    ":key"
+                  ],
+                  "variable": [
+                    {
+                      "key": "key",
+                      "value": "string"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "{}"
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "bearer"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Cache",
+              "//allure.tag=cache"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 templates",
+      "item": [
+        {
+          "name": "03.1 Получить список шаблонов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить список шаблонов",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /templates returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Templates array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each template has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"id\");",
+                  "        pm.expect(item.id).to.exist;",
+                  "",
+                  "        pm.expect(item).to.have.property(\"title\");",
+                  "        pm.expect(item).to.have.property(\"description\");",
+                  "        pm.expect(item).to.have.property(\"severity\");",
+                  "        pm.expect(item).to.have.property(\"label\");",
+                  "        pm.expect(item).to.have.property(\"message\");",
+                  "        pm.expect(item).to.have.property(\"parameters\");",
+                  "",
+                  "        pm.expect(item.parameters).to.be.an(\"array\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates"
+              ]
+            },
+            "description": "Возвращает список всех аналитических шаблонов"
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/templates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "templates"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": \"f7398f73-2a35-2ec3-ac78-2195e5015621\",\n    \"title\": \"string\",\n    \"description\": \"string\",\n    \"severity\": \"MEDIUM\",\n    \"label\": \"NO_GLOVES\",\n    \"message\": \"string\",\n    \"parameters\": [\n      {\n        \"name\": \"string\",\n        \"description\": \"string\",\n        \"value\": 3663.308435027455,\n        \"createdAt\": \"1655413200\",\n        \"updatedAt\": \"1655413200\"\n      },\n      {\n        \"name\": \"string\",\n        \"description\": \"string\",\n        \"value\": 8657.406855202982,\n        \"createdAt\": \"1655413200\",\n        \"updatedAt\": \"1655413200\"\n      }\n    ]\n  },\n  {\n    \"id\": \"60a16f52-bab8-987a-9a28-4dec6d4c275f\",\n    \"title\": \"string\",\n    \"description\": \"string\",\n    \"severity\": \"MEDIUM\",\n    \"label\": \"NO_HELMET\",\n    \"message\": \"string\",\n    \"parameters\": [\n      {\n        \"name\": \"string\",\n        \"description\": \"string\",\n        \"value\": 3090.3689696648453,\n        \"createdAt\": \"1655413200\",\n        \"updatedAt\": \"1655413200\"\n      },\n      {\n        \"name\": \"string\",\n        \"description\": \"string\",\n        \"value\": 4315.87904872063,\n        \"createdAt\": \"1655413200\",\n        \"updatedAt\": \"1655413200\"\n      }\n    ]\n  }\n]"
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Templates",
+              "//allure.tag=templates"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 cameras",
+      "item": [
+        {
+          "name": "04.1 Получить статусы камер",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить статусы камер",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /cameras/status returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Cameras status array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each camera status item has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"id\");",
+                  "        pm.expect(item.id).to.be.a(\"string\").and.not.empty;",
+                  "",
+                  "        pm.expect(item).to.have.property(\"name\");",
+                  "        pm.expect(item.name).to.be.a(\"string\");",
+                  "",
+                  "        pm.expect(item).to.have.property(\"object\");",
+                  "        pm.expect(item).to.have.property(\"coordinator\");",
+                  "        pm.expect(item).to.have.property(\"status\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cameras/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cameras",
+                "status"
+              ]
+            },
+            "description": "Возвращает список всех камер с их текущим статусом"
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cameras/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cameras",
+                    "status"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": \"e0ef3982-a201-327b-be74-4c7cb11a987c\",\n    \"name\": \"string\",\n    \"object\": \"string\",\n    \"coordinator\": \"string\",\n    \"status\": \"string\"\n  },\n  {\n    \"id\": \"020b3c0f-2a50-123e-3245-2bba355a3890\",\n    \"name\": \"string\",\n    \"object\": \"string\",\n    \"coordinator\": \"string\",\n    \"status\": \"string\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "04.2 Получить сервисы камер",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить сервисы камер",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /cameras/service returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Cameras service array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each camera service item has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"id\");",
+                  "        pm.expect(item.id).to.be.a(\"string\").and.not.empty;",
+                  "",
+                  "        pm.expect(item).to.have.property(\"name\");",
+                  "        pm.expect(item).to.have.property(\"object\");",
+                  "        pm.expect(item).to.have.property(\"coordinator\");",
+                  "        pm.expect(item).to.have.property(\"services\");",
+                  "        pm.expect(item.services).to.be.an(\"array\");",
+                  "",
+                  "        item.services.forEach(service => {",
+                  "            pm.expect(service).to.have.property(\"code\");",
+                  "            pm.expect(service.code).to.be.a(\"string\");",
+                  "",
+                  "            pm.expect(service).to.have.property(\"name\");",
+                  "            pm.expect(service.name).to.be.a(\"string\");",
+                  "        });",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cameras/service",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cameras",
+                "service"
+              ]
+            },
+            "description": "Возвращает список всех камер с подключенными аналитическими сервисами"
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cameras/service",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cameras",
+                    "service"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": \"a42646cd-77e4-f765-8b19-c204df435656\",\n    \"name\": \"string\",\n    \"object\": \"string\",\n    \"coordinator\": \"string\",\n    \"services\": [\n      {\n        \"code\": \"string\",\n        \"name\": \"string\"\n      },\n      {\n        \"code\": \"string\",\n        \"name\": \"string\"\n      }\n    ]\n  },\n  {\n    \"id\": \"f3a0cc92-75ea-07eb-7746-56bc3dfd562f\",\n    \"name\": \"string\",\n    \"object\": \"string\",\n    \"coordinator\": \"string\",\n    \"services\": [\n      {\n        \"code\": \"string\",\n        \"name\": \"string\"\n      },\n      {\n        \"code\": \"string\",\n        \"name\": \"string\"\n      }\n    ]\n  }\n]"
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Cameras",
+              "//allure.tag=cameras"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 units",
+      "item": [
+        {
+          "name": "05.1 Получить список юнитов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить список юнитов",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"GET /units returns 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is JSON\", function () {",
+                  "    pm.response.to.have.jsonBody();",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Response is array\", function () {",
+                  "    pm.expect(jsonData).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Units array is not empty\", function () {",
+                  "    pm.expect(jsonData.length).to.be.above(0);",
+                  "});",
+                  "",
+                  "pm.test(\"Each unit has required fields\", function () {",
+                  "    jsonData.forEach(item => {",
+                  "        pm.expect(item).to.have.property(\"id\");",
+                  "        pm.expect(item.id).to.exist;",
+                  "",
+                  "        pm.expect(item).to.have.property(\"name\");",
+                  "        pm.expect(item).to.have.property(\"parentId\");",
+                  "        pm.expect(item).to.have.property(\"unitType\");",
+                  "    });",
+                  "});",
+                  "",
+                  "pm.test(\"At least one unit has expected type\", function () {",
+                  "    const hasExpectedType = jsonData.some(item =>",
+                  "        item && [\"OBJECT\", \"CAMERA\"].includes(item.unitType)",
+                  "    );",
+                  "",
+                  "    pm.expect(hasExpectedType).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/units",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "units"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/units",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "units"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": \"3e9786e9-b407-f1a5-ac3f-735d80a4df88\",\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"parentId\": \"string\",\n    \"unitType\": \"OBJECT\",\n    \"status\": \"string\",\n    \"serverPool\": {\n      \"id\": \"cc567b7e-4ffc-5df3-d203-30d3d7329c50\",\n      \"title\": \"string\",\n      \"ipAddr\": \"string\",\n      \"hostName\": \"string\",\n      \"sshPort\": 4659,\n      \"sshLogin\": \"string\",\n      \"sshPwd\": \"string\",\n      \"sshKey\": \"string\",\n      \"isPwdAuth\": false,\n      \"isUpperLevel\": false,\n      \"type\": \"string\"\n    },\n    \"virtualCamera\": {\n      \"id\": \"b142803f-3e0e-ad4c-3ff4-3dce01d9115d\",\n      \"ipAddr\": \"string\",\n      \"login\": \"string\",\n      \"password\": \"string\",\n      \"port\": 1749,\n      \"portRtcp\": 5659,\n      \"sublink\": \"string\",\n      \"type\": \"string\"\n    }\n  },\n  {\n    \"id\": \"68900f55-1fe1-c6f3-3fb7-0bb646815b8f\",\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"parentId\": \"string\",\n    \"unitType\": \"CAMERA\",\n    \"status\": \"string\",\n    \"serverPool\": {\n      \"id\": \"e346abf1-ba46-188b-1565-4e18843686c2\",\n      \"title\": \"string\",\n      \"ipAddr\": \"string\",\n      \"hostName\": \"string\",\n      \"sshPort\": 3393,\n      \"sshLogin\": \"string\",\n      \"sshPwd\": \"string\",\n      \"sshKey\": \"string\",\n      \"isPwdAuth\": false,\n      \"isUpperLevel\": false,\n      \"type\": \"string\"\n    },\n    \"virtualCamera\": {\n      \"id\": \"61507d32-a5aa-85c2-9c1d-ac43553dd416\",\n      \"ipAddr\": \"string\",\n      \"login\": \"string\",\n      \"password\": \"string\",\n      \"port\": 1704,\n      \"portRtcp\": 9408,\n      \"sublink\": \"string\",\n      \"type\": \"string\"\n    }\n  }\n]"
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Units",
+              "//allure.tag=units"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 analytic params",
+      "item": [
+        {
+          "name": "06.1 Получить список аналитических параметров",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить список аналитических параметров",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Body not empty\", function () {",
+                  "    pm.expect(pm.response.text()).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analytic-params",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytic-params"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/analytic-params",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "analytic-params"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"value\": 4351.159635432505,\n    \"createdAt\": \"1655413200\",\n    \"updatedAt\": \"1655413200\"\n  },\n  {\n    \"name\": \"string\",\n    \"description\": \"string\",\n    \"value\": 2138.484610808127,\n    \"createdAt\": \"1655413200\",\n    \"updatedAt\": \"1655413200\"\n  }\n]"
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Analytic params",
+              "//allure.tag=analytic-params"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 dashboard",
+      "item": [
+        {
+          "name": "07.1 Получить типы событий для дашборда",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "",
+                  "//allure.story=Получить типы событий для дашборда",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Body not empty\", function () {",
+                  "    pm.expect(pm.response.text()).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "events"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "events"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"label\": \"string\",\n    \"eventType\": \"string\"\n  },\n  {\n    \"label\": \"string\",\n    \"eventType\": \"string\"\n  }\n]"
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Dashboard",
+              "//allure.tag=dashboard"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 reports",
+      "item": [
+        {
+          "name": "08.1 Получить список доступных отчетов",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "//allure.story=Получить список доступных отчетов",
+                  "//allure.severity=critical",
+                  "",
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Body not empty\", function () {",
+                  "    pm.expect(pm.response.text()).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: bearer",
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/reports",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reports"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"type\": \"PROTECTION\",\n    \"name\": \"string\"\n  },\n  {\n    \"type\": \"FLAME\",\n    \"name\": \"string\"\n  }\n]"
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "//allure.sub_suite=Reports",
+              "//allure.tag=reports"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "pm.variables.set(\"nowTs\", String(Date.now()));",
+          "",
+          "if (!pm.environment.get(\"baseUrl\")) {",
+          "    throw new Error(\"Environment variable 'baseUrl' is not set\");",
+          "}",
+          "",
+          "if (!pm.environment.get(\"keycloakUrl\")) {",
+          "    console.warn(\"Environment variable 'keycloakUrl' is not set\");",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "//allure.owner=qa_team",
+          "//allure.tag=api,smoke",
+          "//allure.parent_suite=Bearer API",
+          "//allure.suite=Smoke",
+          "",
+          "pm.test(\"Response status is not 5xx\", function () {",
+          "    pm.expect(pm.response.code).to.be.below(500);",
+          "});",
+          "",
+          "pm.test(\"Response time < 2000 ms\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});",
+          "",
+          "const contentType = pm.response.headers.get(\"Content-Type\");",
+          "if (contentType) {",
+          "    pm.test(\"Content-Type header exists\", function () {",
+          "        pm.expect(contentType).to.be.a(\"string\").and.not.empty;",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "keycloakUrl",
+      "value": ""
+    },
+    {
+      "key": "client_secret",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "authAvailable",
+      "value": ""
+    },
+    {
+      "key": "cacheKey",
+      "value": ""
+    }
+  ]
+}
