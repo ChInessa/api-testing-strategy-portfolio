@@ -38,7 +38,7 @@ LOG_FILE="$LOG_DIR/newman-$SUITE.log"
 # Создаём директории для результатов
 mkdir -p "$ALLURE_DIR" "$HTML_DIR" "$LOG_DIR"
 
-# Выводим параметры запуска в лог CI
+# Выводим параметры запуска
 echo "Запуск Newman"
 echo "Набор тестов: $SUITE"
 echo "Коллекция: $COLLECTION"
@@ -56,26 +56,32 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
-# Проверяем, что секрет для авторизации передан
-if [[ -z "${CLIENT_SECRET:-}" ]]; then
-  echo "Ошибка: переменная CLIENT_SECRET пуста"
-  exit 1
+# Формируем аргументы Newman
+NEWMAN_ARGS=(
+  run "$COLLECTION"
+  -e "$ENV_FILE"
+  -r cli,allure,htmlextra
+  --reporter-allure-resultsDir "$ALLURE_DIR"
+  --reporter-htmlextra-export "$HTML_DIR/index.html"
+  --timeout-request 10000
+  --timeout-script 10000
+  --timeout 20000
+)
+
+# Если CLIENT_SECRET задан, добавляем его в запуск.
+# Если нет — выполняем запуск в демонстрационном режиме.
+if [[ -n "${CLIENT_SECRET:-}" ]]; then
+  echo "Режим запуска: с CLIENT_SECRET"
+  NEWMAN_ARGS+=(--env-var "client_secret=$CLIENT_SECRET")
+else
+  echo "Режим запуска: демонстрационный (CLIENT_SECRET не задан)"
 fi
 
 # Запускаем Newman.
 # Временно отключаем строгий выход по ошибке,
 # чтобы сохранить код возврата команды при использовании tee.
 set +e
-npx newman run "$COLLECTION" \
-  -e "$ENV_FILE" \
-  --env-var "client_secret=$CLIENT_SECRET" \
-  -r cli,allure,htmlextra \
-  --reporter-allure-resultsDir "$ALLURE_DIR" \
-  --reporter-htmlextra-export "$HTML_DIR/index.html" \
-  --timeout-request 10000 \
-  --timeout-script 10000 \
-  --timeout 20000 \
-  2>&1 | tee "$LOG_FILE"
+npx newman "${NEWMAN_ARGS[@]}" 2>&1 | tee "$LOG_FILE"
 EXIT_CODE=${PIPESTATUS[0]}
 set -e
 
