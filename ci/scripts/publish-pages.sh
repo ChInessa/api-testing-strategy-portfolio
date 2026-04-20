@@ -11,10 +11,10 @@ git config --global user.email "github-actions@users.noreply.github.com"
 : "${PAGES_BRANCH:?Переменная PAGES_BRANCH не задана}"
 
 # Подтягиваем gh-pages, если она существует
-if git ls-remote --exit-code origin "${PAGES_BRANCH}" >/dev/null 2>&1; then
-  git clone --depth 1 --branch "${PAGES_BRANCH}" . repo-pages
+if git ls-remote --exit-code github "${PAGES_BRANCH}" >/dev/null 2>&1; then
+  git clone --depth 1 --branch "${PAGES_BRANCH}" "$(git remote get-url github)" repo-pages
 else
-  git clone . repo-pages
+  git clone "$(git remote get-url github)" repo-pages
   cd repo-pages
   git checkout --orphan "${PAGES_BRANCH}"
   git rm -rf . >/dev/null 2>&1 || true
@@ -101,4 +101,4 @@ else
   echo "Изменений для коммита нет"
 fi
 
-git push origin "${PAGES_BRANCH}"
+git push github "${PAGES_BRANCH}"
