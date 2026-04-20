@@ -1,7 +1,16 @@
 # API Autotests (Postman + Newman + Allure)
 
-Репозиторий демонстрирует подход к автоматизированному тестированию API с использованием Postman/Newman, генерацией Allure-отчётов и построением CI/CD pipeline на GitHub Actions.
+##  Live demo
 
+👉 https://chinessa.github.io/api-testing-strategy-portfolio/
+
+##  CI/CD
+
+![GitHub Actions](https://github.com/ChInessa/api-testing-strategy-portfolio/actions/workflows/api-tests.yml/badge.svg)
+
+---
+
+Репозиторий демонстрирует подход к автоматизированному тестированию API с использованием Postman/Newman, генерацией Allure-отчётов и построением CI/CD pipeline на GitHub Actions.
 ---
 
 ## Описание проекта
