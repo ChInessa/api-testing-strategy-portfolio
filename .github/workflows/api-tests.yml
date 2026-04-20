@@ -1,0 +1,200 @@
+name: API autotests
+
+on:
+  # Ручной запуск из вкладки Actions
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Набор тестов"
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - smoke
+          - regression
+      environment:
+        description: "Окружение"
+        required: true
+        default: dev
+        type: choice
+        options:
+          - dev
+          - test
+
+  # Автозапуск при пуше в main
+  push:
+    branches:
+      - main
+
+  # Ночной / плановый запуск regression
+  schedule:
+    # Каждый понедельник в 03:00 UTC
+    - cron: "0 3 * * 1"
+
+jobs:
+  smoke:
+    # Логика:
+    # 1. При push в main запускаем smoke
+    # 2. При ручном запуске запускаем только если выбран smoke
+    if: >
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.suite == 'smoke')
+
+    runs-on: ubuntu-latest
+
+    env:
+      # Для портфолио-версии берём dev как базовое окружение для smoke
+      POSTMAN_ENV_FILE: postman/environments/dev.json
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET_DEV }}
+
+    steps:
+      # Забираем код репозитория
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Ставим Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # Ставим Python, т.к. у тебя есть python-скрипты для dashboard/report logic
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Устанавливаем зависимости проекта
+      - name: Install npm dependencies
+        run: npm install
+
+      # Устанавливаем Allure CLI
+      - name: Install Allure
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jre
+          npm install -g allure-commandline --unsafe-perm=true
+
+      # Готовим каталоги для результатов
+      - name: Prepare directories
+        run: |
+          mkdir -p reports
+          mkdir -p reports/htmlextra/smoke
+          mkdir -p allure-results/smoke
+          mkdir -p site/dev/smoke
+
+      # Запуск smoke тестов
+      # continue-on-error нужен, чтобы отчёты собрались даже при падении тестов
+      - name: Run smoke tests
+        id: smoke_tests
+        continue-on-error: true
+        run: |
+          bash ci/scripts/run-tests.sh smoke "$POSTMAN_ENV_FILE"
+
+      # Генерация Allure-отчёта для smoke
+      # always() нужен, чтобы отчёт собирался даже если тесты упали
+      - name: Generate smoke report
+        if: always()
+        env:
+          REPORT_ENV: dev
+          REPORT_BASE: ./site
+          CI_PIPELINE_ID: ${{ github.run_number }}
+          CI_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CI_SERVER_URL: ${{ github.server_url }}
+          CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+          CI_COMMIT_SHA: ${{ github.sha }}
+          PAGES_BRANCH: gh-pages
+          GL_PAGES_PUSH_TOKEN: dummy
+          POSTMAN_ENV: dev
+        run: |
+          bash ci/scripts/generate-allure.sh smoke
+
+      # Сохраняем результаты smoke как артефакты
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-artifacts
+          path: |
+            reports
+            allure-results
+            site
+
+  regression:
+    # Логика:
+    # 1. По расписанию гоняем regression
+    # 2. При ручном запуске запускаем только если выбран regression
+    if: >
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.suite == 'regression')
+
+    runs-on: ubuntu-latest
+
+    env:
+      # Для regression используем test окружение
+      POSTMAN_ENV_FILE: postman/environments/test.json
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET_TEST }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Install Allure
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jre
+          npm install -g allure-commandline --unsafe-perm=true
+
+      - name: Prepare directories
+        run: |
+          mkdir -p reports
+          mkdir -p reports/htmlextra/regression
+          mkdir -p allure-results/regression
+          mkdir -p site/test/regression
+
+      # Запуск regression тестов
+      - name: Run regression tests
+        id: regression_tests
+        continue-on-error: true
+        run: |
+          bash ci/scripts/run-tests.sh regression "$POSTMAN_ENV_FILE"
+
+      # Генерация Allure-отчёта для regression
+      - name: Generate regression report
+        if: always()
+        env:
+          REPORT_ENV: test
+          REPORT_BASE: ./site
+          CI_PIPELINE_ID: ${{ github.run_number }}
+          CI_PIPELINE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CI_SERVER_URL: ${{ github.server_url }}
+          CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+          CI_COMMIT_SHA: ${{ github.sha }}
+          PAGES_BRANCH: gh-pages
+          GL_PAGES_PUSH_TOKEN: dummy
+          POSTMAN_ENV: test
+        run: |
+          bash ci/scripts/generate-allure.sh regression
+
+      - name: Upload regression artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-artifacts
+          path: |
+            reports
+            allure-results
+            site
