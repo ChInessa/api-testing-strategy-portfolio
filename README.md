@@ -1,91 +1,193 @@
-# API Autotests (Postman + Newman + Allure)
+# Newman API autotests
 
-Репозиторий для автоматизированного тестирования API с использованием Postman/Newman, генерацией Allure-отчётов и реализацией CI/CD pipeline на GitHub Actions.
+Репозиторий для запуска API-автотестов через Postman / Newman с генерацией Allure-отчётов и публикацией в GitLab Pages.
 
-## Описание проекта
+---
 
-Реализована система автоматизированного тестирования API с поддержкой smoke и regression сценариев, построением отчётности и хранением истории прогонов.
+## Назначение
 
-Проект решает задачи:
-- регулярной проверки стабильности API;
-- визуализации результатов тестирования;
-- анализа трендов качества;
-- автоматизации запуска тестов через CI/CD.
+Проект предназначен для автоматизированного тестирования API с использованием Postman/Newman.
 
-## Скриншоты
+Основные задачи:
+- запуск smoke и regression тестов;
+- генерация Allure-отчётов;
+- публикация latest и archive отчётов в GitLab Pages;
+- хранение истории прогонов и анализ трендов стабильности.
 
-### Дашборд отчётов
-![Dashboard](docs/dashboard.png)
+---
 
-### Allure — обзор
-![Allure Overview](docs/allure-overview.png)
+## Логика запусков
 
-### Тесты в Allure
-![Allure Tests](docs/allure-tests.png)
+Проект использует две ветки с разным сценарием запуска тестов:
 
-### CI/CD pipeline
-![Pipeline](docs/pipeline.png)
+| Ветка        | Набор тестов | Расписание |
+|--------------|--------------|------------|
+| dev          | smoke        | ежедневно |
+| test-stand   | smoke        | ежедневно |
+| test-stand   | regression   | каждый понедельник |
 
-## Основной функционал
+Такое разделение позволяет:
+- быстро отслеживать стабильность API в dev;
+- регулярно прогонять полный регресс на test-stand.
 
-- запуск smoke и regression тестов через Newman;
-- генерация отчётов в Allure;
-- публикация отчётов (latest и archive);
-- хранение истории прогонов;
-- разделение тестов по окружениям (dev, test-stand);
-- запуск тестов через GitHub Actions (push и manual trigger);
-- настройка расписания запусков.
+---
 
-## CI/CD
+## Отчёты
 
-Pipeline реализован на GitHub Actions и демонстрирует полный цикл:
+Общий индекс отчётов:
 
-```text
-test -> artifacts
+http://va.pages.videoanalytics.tech/qa/autotests/newman/
+
+### Структура публикации
+
+#### dev
+- Latest smoke
+- Archive smoke
+
+#### test-stand
+- Latest smoke
+- Archive smoke
+- Latest regression
+- Archive regression
+
+---
+
+## Архитектура отчётов
+
+Каждый прогон формирует:
+- latest — актуальный отчёт;
+- archive/<suite>-<pipeline_id> — архивный отчёт.
+
+Принципы публикации:
+- Allure history строится из latest;
+- ссылки в trend-графике ведут в archive;
+- dev и test-stand изолированы;
+- smoke и regression разделены.
+
+---
+
+## Структура проекта
+
+```
+postman/
+  collections/
+  environments/
+
+scripts/
+  run-newman.sh
+
+ci/
+  scripts/
+    run-tests.sh
+    failure-reason.sh
+    generate-allure.sh
+    publish-pages.sh
+
+.gitlab-ci.yml
+README.md
 ```
 
-- test — запуск автотестов (smoke / regression);
-- artifacts — сохранение результатов выполнения (reports, allure-results).
+---
 
-Особенности:
-- smoke тесты запускаются автоматически при push в main;
-- regression тесты запускаются вручную через workflow_dispatch;
-- pipeline продолжает выполнение даже при ошибках тестов (continue-on-error);
-- артефакты сохраняются для анализа результатов.
+## Локальный запуск
 
-Важно: в публичной версии репозитория тесты выполняются в демонстрационном режиме без подключения к реальным сервисам.
+Установка зависимостей:
 
-## Стек технологий
+```bash
+npm install
+```
 
-- Postman
-- Newman
-- Allure
-- GitHub Actions
-- Bash / Shell
-- JavaScript
-- Python
+Запуск smoke:
 
-## Результат
+```bash
+npm run test:smoke
+```
 
-Реализована воспроизводимая и расширяемая система API-тестирования, обеспечивающая:
-- автоматический контроль качества API;
-- прозрачную отчётность;
-- возможность анализа стабильности системы во времени.
+или:
 
-## Ограничения публичной версии
+```bash
+bash scripts/run-newman.sh smoke
+```
 
-Данный репозиторий является демонстрационной версией.
+Запуск regression:
 
-Реальные автотесты в рабочем проекте выполняются:
-- во внутренней инфраструктуре;
-- с использованием VPN;
-- с приватными Docker-образами и секретами.
+```bash
+npm run test:regression
+```
 
-В публичной версии:
-- отключены реальные интеграции;
-- используются демо-данные;
-- CI/CD pipeline демонстрирует архитектуру и процесс выполнения.
-  
-## Для резюме
+или:
 
-Проект демонстрирует опыт выстраивания процесса контроля качества API, интеграции тестирования в CI/CD и организации отчётности для командной работы и управления релизными рисками.
+```bash
+bash scripts/run-newman.sh regression
+```
+
+---
+
+## Локальные отчёты
+
+HTML Extra:
+```
+reports/htmlextra/<suite>/index.html
+```
+
+Allure results:
+```
+allure-results/<suite>/
+```
+
+---
+
+## CI pipeline
+
+Pipeline:
+
+```
+test -> report -> publish -> pages
+```
+
+### Этапы:
+
+- test  
+  ci/scripts/run-tests.sh
+
+- report  
+  ci/scripts/generate-allure.sh
+
+- publish  
+  ci/scripts/publish-pages.sh
+
+- pages  
+  GitLab Pages
+
+---
+
+## Логика публикации
+
+Публикация отчётов зависит от ветки:
+
+### dev
+- выполняется только smoke;
+- публикуется latest и archive для smoke.
+
+### test-stand
+- выполняется smoke ежедневно;
+- выполняется regression по расписанию (каждый понедельник);
+- публикуется latest и archive для обоих наборов тестов.
+
+---
+
+## Хранение архивов
+
+- smoke — 30 дней  
+- regression — 120 дней  
+
+---
+
+## Особенности
+
+- allow_failure для test job
+- отчёты публикуются даже при падении тестов
+- latest + archive
+- dev — только smoke
+- test-stand — smoke + regression
+- ветка gl-pages без CI
