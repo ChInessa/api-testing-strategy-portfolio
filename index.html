@@ -12,6 +12,7 @@
       --muted: #475569;
       --line: #dbe3f0;
       --accent: #2563eb;
+      --accent-dark: #1d4ed8;
       --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
       --radius: 18px;
     }
@@ -47,12 +48,47 @@
       letter-spacing: -0.03em;
     }
 
+    h2 {
+      font-size: 26px;
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
     .lead {
       margin: 0;
-      max-width: 920px;
+      max-width: 960px;
       color: var(--muted);
       line-height: 1.6;
       font-size: 17px;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .badge-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .badge-wrap img {
+      width: auto;
+      height: 20px;
+      border-radius: 0;
+      border: 0;
+      margin: 0;
     }
 
     .buttons {
@@ -74,6 +110,10 @@
     .btn.primary {
       background: var(--accent);
       color: white;
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-dark);
     }
 
     .btn.secondary {
@@ -112,10 +152,8 @@
       font-size: 14px;
     }
 
-    .section-title {
-      font-size: 24px;
-      margin: 0 0 16px;
-      letter-spacing: -0.02em;
+    .section {
+      margin-top: 30px;
     }
 
     .grid {
@@ -130,11 +168,12 @@
       padding: 20px;
       box-shadow: var(--shadow);
       border: 1px solid var(--line);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 18px;
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
     }
 
     .card p {
@@ -142,7 +181,7 @@
       color: var(--muted);
       font-size: 15px;
       line-height: 1.55;
-      min-height: 70px;
+      min-height: 95px;
     }
 
     .image-wrap {
@@ -150,6 +189,11 @@
       overflow: hidden;
       border: 1px solid var(--line);
       background: #fff;
+    }
+
+    .image-wrap a {
+      display: block;
+      text-decoration: none;
     }
 
     img {
@@ -167,6 +211,30 @@
       color: var(--muted);
       box-shadow: var(--shadow);
       line-height: 1.6;
+    }
+
+    .howto {
+      margin-top: 28px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    pre {
+      margin: 12px 0 0;
+      padding: 16px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #e2e8f0;
+      overflow-x: auto;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     .footer {
@@ -195,16 +263,24 @@
   <div class="container">
 
     <section class="hero">
-      <h1>API Autotests Portfolio</h1>
-      <p class="lead">
-        Публичная демонстрация проекта по автоматизации API-тестирования. Репозиторий показывает
-        структуру smoke и regression сценариев, запуск через GitHub Actions, генерацию Allure-отчётов
-        и организацию CI/CD процесса для командной работы.
-      </p>
+      <div class="hero-top">
+        <div>
+          <h1>API Autotests Portfolio</h1>
+          <p class="lead">
+            Публичная демонстрация проекта по автоматизации API-тестирования. Репозиторий показывает
+            структуру smoke и regression сценариев, запуск через GitHub Actions, генерацию Allure-отчётов
+            и организацию CI/CD процесса для командной работы.
+          </p>
+        </div>
+
+        <div class="badge-wrap">
+          <img src="https://github.com/ChInessa/api-testing-strategy-portfolio/actions/workflows/api-tests.yml/badge.svg" alt="GitHub Actions status">
+        </div>
+      </div>
 
       <div class="buttons">
-        <a class="btn primary" href="https://github.com/ChInessa/api-testing-strategy-portfolio">Репозиторий</a>
-        <a class="btn secondary" href="https://github.com/ChInessa/api-testing-strategy-portfolio/actions">GitHub Actions</a>
+        <a class="btn primary" href="https://github.com/ChInessa/api-testing-strategy-portfolio" target="_blank">Репозиторий</a>
+        <a class="btn secondary" href="https://github.com/ChInessa/api-testing-strategy-portfolio/actions" target="_blank">GitHub Actions</a>
       </div>
     </section>
 
@@ -227,40 +303,72 @@
       </div>
     </section>
 
-    <h2 class="section-title">Ключевые части проекта</h2>
+    <section class="section">
+      <h2>Ключевые части проекта</h2>
 
-    <section class="grid">
-      <div class="card">
-        <h3>CI/CD Pipeline</h3>
-        <p>Автоматический запуск smoke тестов и отдельный ручной запуск regression сценариев через GitHub Actions.</p>
-        <div class="image-wrap">
-          <img src="docs/pipeline.png" alt="CI/CD pipeline">
+      <div class="grid">
+        <div class="card">
+          <h3>CI/CD Pipeline</h3>
+          <p>
+            Автоматический запуск smoke тестов и отдельный ручной запуск regression сценариев
+            через GitHub Actions.
+          </p>
+          <div class="image-wrap">
+            <a href="docs/pipeline.png" target="_blank">
+              <img src="docs/pipeline.png" alt="CI/CD pipeline">
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Allure отчёты</h3>
+          <p>
+            Генерация отчётов, метаданных запуска и подготовка структуры для анализа
+            результатов тестирования.
+          </p>
+          <div class="image-wrap">
+            <a href="docs/allure-overview.png" target="_blank">
+              <img src="docs/allure-overview.png" alt="Allure overview">
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Тестовые сценарии</h3>
+          <p>
+            Структура smoke и regression наборов, запуск коллекций Newman и сохранение
+            артефактов выполнения.
+          </p>
+          <div class="image-wrap">
+            <a href="docs/allure-tests.png" target="_blank">
+              <img src="docs/allure-tests.png" alt="Allure tests">
+            </a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Dashboard</h3>
+          <p>
+            Отдельная HTML-страница для сводного просмотра latest и archive отчётов
+            с фильтрацией и статистикой.
+          </p>
+          <div class="image-wrap">
+            <a href="docs/dashboard.png" target="_blank">
+              <img src="docs/dashboard.png" alt="Dashboard">
+            </a>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="card">
-        <h3>Allure отчёты</h3>
-        <p>Генерация отчётов, метаданных запуска и подготовка структуры для анализа результатов тестирования.</p>
-        <div class="image-wrap">
-          <img src="docs/allure-overview.png" alt="Allure overview">
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Тестовые сценарии</h3>
-        <p>Структура smoke и regression наборов, запуск коллекций Newman и сохранение артефактов выполнения.</p>
-        <div class="image-wrap">
-          <img src="docs/allure-tests.png" alt="Allure tests">
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Dashboard</h3>
-        <p>Отдельная HTML-страница для сводного просмотра latest и archive отчётов с фильтрацией и статистикой.</p>
-        <div class="image-wrap">
-          <img src="docs/dashboard.png" alt="Dashboard">
-        </div>
-      </div>
+    <section class="howto">
+      <h2>Как запустить</h2>
+      <p>
+        Публичная версия проекта демонстрационная, но структура локального запуска сохранена.
+      </p>
+      <pre><code>npm install
+npm run test:smoke
+npm run test:regression</code></pre>
     </section>
 
     <section class="note">
