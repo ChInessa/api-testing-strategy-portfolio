@@ -63,6 +63,14 @@ jobs:
         run: |
           bash scripts/run-newman.sh smoke postman/environments/dev.json || true
 
+      # Создаём демо-артефакты, чтобы в Actions не было предупреждения
+      # о пустых каталогах reports и allure-results
+      - name: Создаём демо-артефакты smoke
+        if: always()
+        run: |
+          echo "Demo smoke report" > reports/demo-smoke.txt
+          echo '{"suite":"smoke","status":"demo"}' > allure-results/smoke/demo-smoke.json
+
       # Сохраняем артефакты
       - name: Загружаем артефакты smoke
         if: always()
@@ -108,6 +116,14 @@ jobs:
         continue-on-error: true
         run: |
           bash scripts/run-newman.sh regression postman/environments/test.json || true
+
+      # Создаём демо-артефакты, чтобы в Actions не было предупреждения
+      # о пустых каталогах reports и allure-results
+      - name: Создаём демо-артефакты regression
+        if: always()
+        run: |
+          echo "Demo regression report" > reports/demo-regression.txt
+          echo '{"suite":"regression","status":"demo"}' > allure-results/regression/demo-regression.json
 
       - name: Загружаем артефакты regression
         if: always()
