@@ -5,67 +5,272 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Autotests Portfolio</title>
   <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #dbe3f0;
+      --accent: #2563eb;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f6f8fb;
-      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
-    .wrap {
-      max-width: 900px;
+
+    .container {
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 48px 20px;
+      padding: 36px 20px 56px;
     }
-    .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+
+    .hero {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      border: 1px solid var(--line);
     }
+
     h1 {
-      margin-top: 0;
-      font-size: 32px;
+      margin: 0 0 16px;
+      font-size: 44px;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
     }
-    p {
+
+    .lead {
+      margin: 0;
+      max-width: 920px;
+      color: var(--muted);
       line-height: 1.6;
-      color: #4b5563;
+      font-size: 17px;
     }
-    .links {
-      margin-top: 24px;
+
+    .buttons {
+      margin-top: 28px;
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
     }
-    a {
-      display: inline-block;
+
+    .btn {
+      padding: 13px 18px;
+      border-radius: 12px;
       text-decoration: none;
-      padding: 12px 16px;
-      border-radius: 10px;
-      background: #2563eb;
-      color: white;
-      font-weight: 600;
+      font-weight: 700;
+      display: inline-block;
+      transition: 0.15s ease;
     }
-    a.secondary {
+
+    .btn.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn.secondary {
+      background: white;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      margin: 0 0 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+      min-height: 70px;
+    }
+
+    .image-wrap {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
       background: #fff;
-      color: #111827;
-      border: 1px solid #d1d5db;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .note {
+      margin-top: 28px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+      line-height: 1.6;
+    }
+
+    .footer {
+      margin-top: 34px;
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .hero {
+        padding: 28px;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .lead {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
+  <div class="container">
+
+    <section class="hero">
       <h1>API Autotests Portfolio</h1>
-      <p>
-        Демонстрационная страница публичной версии проекта по автоматизации API-тестирования.
-        Репозиторий показывает структуру smoke/regression тестов, интеграцию с GitHub Actions,
-        генерацию Allure-отчётов и организацию CI/CD процесса.
+      <p class="lead">
+        Публичная демонстрация проекта по автоматизации API-тестирования. Репозиторий показывает
+        структуру smoke и regression сценариев, запуск через GitHub Actions, генерацию Allure-отчётов
+        и организацию CI/CD процесса для командной работы.
       </p>
-      <div class="links">
-        <a href="https://github.com/ChInessa/api-testing-strategy-portfolio">Открыть репозиторий</a>
-        <a class="secondary" href="https://github.com/ChInessa/api-testing-strategy-portfolio/actions">GitHub Actions</a>
+
+      <div class="buttons">
+        <a class="btn primary" href="https://github.com/ChInessa/api-testing-strategy-portfolio">Репозиторий</a>
+        <a class="btn secondary" href="https://github.com/ChInessa/api-testing-strategy-portfolio/actions">GitHub Actions</a>
       </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-value">Smoke</div>
+        <div class="stat-label">Автозапуск при push</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Regression</div>
+        <div class="stat-label">Ручной запуск workflow</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">Allure</div>
+        <div class="stat-label">Отчётность и анализ результатов</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">CI/CD</div>
+        <div class="stat-label">GitHub Actions pipeline</div>
+      </div>
+    </section>
+
+    <h2 class="section-title">Ключевые части проекта</h2>
+
+    <section class="grid">
+      <div class="card">
+        <h3>CI/CD Pipeline</h3>
+        <p>Автоматический запуск smoke тестов и отдельный ручной запуск regression сценариев через GitHub Actions.</p>
+        <div class="image-wrap">
+          <img src="docs/pipeline.png" alt="CI/CD pipeline">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Allure отчёты</h3>
+        <p>Генерация отчётов, метаданных запуска и подготовка структуры для анализа результатов тестирования.</p>
+        <div class="image-wrap">
+          <img src="docs/allure-overview.png" alt="Allure overview">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Тестовые сценарии</h3>
+        <p>Структура smoke и regression наборов, запуск коллекций Newman и сохранение артефактов выполнения.</p>
+        <div class="image-wrap">
+          <img src="docs/allure-tests.png" alt="Allure tests">
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Dashboard</h3>
+        <p>Отдельная HTML-страница для сводного просмотра latest и archive отчётов с фильтрацией и статистикой.</p>
+        <div class="image-wrap">
+          <img src="docs/dashboard.png" alt="Dashboard">
+        </div>
+      </div>
+    </section>
+
+    <section class="note">
+      В публичной версии проекта отключены реальные интеграции с внутренней инфраструктурой,
+      VPN и приватными артефактами. Репозиторий демонстрирует архитектуру решения, структуру
+      автотестов и подход к построению CI/CD и отчётности.
+    </section>
+
+    <div class="footer">
+      API Autotests Portfolio • GitHub Pages
     </div>
   </div>
 </body>
